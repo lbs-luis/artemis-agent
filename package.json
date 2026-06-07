@@ -1,0 +1,29 @@
+{
+	"name": "artemis-agent",
+	"private": true,
+	"type": "module",
+
+	"workspaces": [
+		"src/packages/*",
+		"web"
+	],
+	"scripts": {
+		"cli": "bun src/cli.ts",
+		"dev": "bun --hot src/http/server.ts",
+		"start": "NODE_ENV=production bun src/http/server.ts",
+		"lint": "biome check .",
+		"fix": "biome check --write .",
+		"typecheck": "bunx tsc --noEmit"
+	},
+	"dependencies": {
+		"@artemis/llm-core": "workspace:*"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.16",
+		"@types/bun": "latest",
+		"bun-plugin-tailwind": "^0.1.2"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}
