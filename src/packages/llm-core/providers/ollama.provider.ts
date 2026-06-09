@@ -12,7 +12,12 @@ export function createOllamaProvider(config: OllamaConfig): ProviderStream {
 		const response = await fetch(`${baseUrl}/api/chat`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ model: config.model, messages, stream: true }),
+			body: JSON.stringify({
+				model: config.model,
+				messages,
+				stream: true,
+				think: true,
+			}),
 			signal: options?.signal, // cancellation threads through
 		});
 
@@ -21,7 +26,7 @@ export function createOllamaProvider(config: OllamaConfig): ProviderStream {
 				type: "error",
 				message: `Ollama ${response.status}: ${await response.text()}`,
 			};
-			return; // errors-as-values, not throw
+			return;
 		}
 
 		const reader = response.body.getReader();

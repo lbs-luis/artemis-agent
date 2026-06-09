@@ -1,0 +1,17 @@
+{
+	"name": "@artemis/cli",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"module": "src/index.ts",
+	"dependencies": {
+		"@artemis/llm-core": "workspace:*",
+		"@artemis/session-store": "workspace:*",
+		"@opentui/core": "^0.3.4",
+		"@opentui/react": "^0.3.4",
+		"react": "^19.2.7"
+	},
+	"devDependencies": {
+		"@types/react": "^19.2.17"
+	}
+}

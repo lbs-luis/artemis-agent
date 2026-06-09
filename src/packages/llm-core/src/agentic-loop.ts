@@ -15,11 +15,10 @@ export interface RunOptions {
 }
 
 export async function agentLoop(
-	userText: string,
+	messages: Message[],
 	opts: RunOptions,
 ): Promise<string> {
 	const { provider, tools = {}, signal, onEvent } = opts;
-	const messages: Message[] = [{ role: "user", content: userText }];
 
 	while (true) {
 		if (signal?.aborted) throw new Error("aborted");
