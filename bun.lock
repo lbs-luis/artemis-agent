@@ -6,6 +6,7 @@
       "name": "artemis-agent",
       "dependencies": {
         "@artemis/llm-core": "workspace:*",
+        "@artemis/llm-tools": "workspace:*",
         "@artemis/session-store": "workspace:*",
       },
       "devDependencies": {
@@ -17,11 +18,12 @@
         "typescript": "^5",
       },
     },
-    "apps/cli": {
+    "src/apps/cli": {
       "name": "@artemis/cli",
       "version": "0.0.1",
       "dependencies": {
         "@artemis/llm-core": "workspace:*",
+        "@artemis/llm-tools": "workspace:*",
         "@artemis/session-store": "workspace:*",
         "@opentui/core": "^0.3.4",
         "@opentui/react": "^0.3.4",
@@ -31,18 +33,7 @@
         "@types/react": "^19.2.17",
       },
     },
-    "src/packages/llm-core": {
-      "name": "@artemis/llm-core",
-      "version": "0.0.1",
-    },
-    "src/packages/session-store": {
-      "name": "@artemis/session-store",
-      "version": "0.0.1",
-      "dependencies": {
-        "@artemis/llm-core": "workspace:*",
-      },
-    },
-    "web": {
+    "src/apps/web": {
       "name": "bun-react-template",
       "version": "0.1.0",
       "dependencies": {
@@ -65,11 +56,31 @@
         "tailwindcss": "^4.1.11",
       },
     },
+    "src/packages/llm-core": {
+      "name": "@artemis/llm-core",
+      "version": "0.0.1",
+      "dependencies": {
+        "@artemis/llm-tools": "workspace:*",
+      },
+    },
+    "src/packages/llm-tools": {
+      "name": "@artemis/llm-tools",
+      "version": "0.0.1",
+    },
+    "src/packages/session-store": {
+      "name": "@artemis/session-store",
+      "version": "0.0.1",
+      "dependencies": {
+        "@artemis/llm-core": "workspace:*",
+      },
+    },
   },
   "packages": {
-    "@artemis/cli": ["@artemis/cli@workspace:apps/cli"],
+    "@artemis/cli": ["@artemis/cli@workspace:src/apps/cli"],
 
     "@artemis/llm-core": ["@artemis/llm-core@workspace:src/packages/llm-core"],
+
+    "@artemis/llm-tools": ["@artemis/llm-tools@workspace:src/packages/llm-tools"],
 
     "@artemis/session-store": ["@artemis/session-store@workspace:src/packages/session-store"],
 
@@ -225,7 +236,7 @@
 
     "bun-plugin-tailwind": ["bun-plugin-tailwind@0.1.2", "", { "peerDependencies": { "bun": ">=1.0.0" } }, "sha512-41jNC1tZRSK3s1o7pTNrLuQG8kL/0vR/JgiTmZAJ1eHwe0w5j6HFPKeqEk0WAD13jfrUC7+ULuewFBBCoADPpg=="],
 
-    "bun-react-template": ["bun-react-template@workspace:web"],
+    "bun-react-template": ["bun-react-template@workspace:src/apps/web"],
 
     "bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
 

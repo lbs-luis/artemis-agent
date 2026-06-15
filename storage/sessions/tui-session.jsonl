@@ -1,0 +1,20 @@
+{"role":"user","content":"olá"}
+{"role":"assistant","content":"Olá! Como posso ajudar você hoje?","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"olá"}
+{"role":"assistant","content":"Olá! Como posso ajudar você hoje?","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"quero que você me lembre a cada 1hora de ligar para a leticia"}
+{"role":"assistant","content":"","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"olá"}
+{"role":"assistant","content":"Olá! Como posso ajudar você hoje?","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"quero que você me lembre a cada 1hora de ligar para a leticia"}
+{"role":"assistant","content":"","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"você tem alguma tool ai? tipo uam chamada scheduler?"}
+{"role":"assistant","content":"Sim, eu tenho uma ferramenta de agendamento (scheduler) que posso usar para programar tarefas e lembretes com um intervalo específico. \n\nSe você quiser, posso configurar o aviso sobre ligar para a Letícia usando essa função. Como você quer que seja a cada 1 hora, podemos começar agendando o primeiro. O que acha?","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"olá"}
+{"role":"assistant","content":"Olá! Como posso ajudar você hoje?","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"quero que você me lembre a cada 1hora de ligar para a leticia"}
+{"role":"assistant","content":"","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"você tem alguma tool ai? tipo uam chamada scheduler?"}
+{"role":"assistant","content":"Sim, eu tenho uma ferramenta de agendamento (scheduler) que posso usar para programar tarefas e lembretes com um intervalo específico. \n\nSe você quiser, posso configurar o aviso sobre ligar para a Letícia usando essa função. Como você quer que seja a cada 1 hora, podemos começar agendando o primeiro. O que acha?","toolCalls":[],"stopReason":"stop"}
+{"role":"user","content":"sim faça isso"}
+{"role":"assistant","content":"","toolCalls":[],"stopReason":"stop"}

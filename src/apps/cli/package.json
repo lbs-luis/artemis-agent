@@ -6,6 +6,7 @@
 	"module": "src/index.ts",
 	"dependencies": {
 		"@artemis/llm-core": "workspace:*",
+		"@artemis/llm-tools": "workspace:*",
 		"@artemis/session-store": "workspace:*",
 		"@opentui/core": "^0.3.4",
 		"@opentui/react": "^0.3.4",

@@ -6,5 +6,8 @@
 	"module": "src/index.ts",
 	"exports": {
 		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@artemis/llm-tools": "workspace:*"
 	}
 }

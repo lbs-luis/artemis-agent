@@ -3,7 +3,7 @@ import { join } from "node:path";
 import type { Message } from "@artemis/llm-core";
 import type { SessionStore } from "./types.ts";
 
-export function createFileSessionStore(dir = "sessions"): SessionStore {
+export function createFileSessionStore(dir = "storage/sessions"): SessionStore {
 	const fileFor = (id: string) => join(dir, `${id}.jsonl`);
 
 	return {

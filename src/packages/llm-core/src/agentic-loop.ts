@@ -69,15 +69,22 @@ async function assembleAssistant(
 		description: t.description,
 	}));
 
-	for await (const ev of provider(messages, { tools: toolSchemas, signal })) {
-		if (ev.type === "delta") {
-			content += ev.text;
-			onEvent?.({ type: "text", text: ev.text });
-		} else if (ev.type === "tool_call") {
-			toolCalls.push({ id: ev.id, name: ev.name, args: ev.args });
-			onEvent?.({ type: "tool_start", name: ev.name, args: ev.args });
-		} else if (ev.type === "done") stopReason = ev.stopReason;
-		else throw new Error(ev.message); // error event
+	console.log("[assembleAssistant]: Tools: ", JSON.stringify(toolSchemas));
+
+	for await (const event of provider(messages, {
+		tools: toolSchemas,
+		signal,
+	})) {
+		if (event.type === "delta") {
+			content += event.text;
+			onEvent?.({ type: "text", text: event.text });
+		} else if (event.type === "tool_call") {
+			const toolCall = { id: event.id, name: event.name, args: event.args };
+			toolCalls.push(toolCall);
+			console.log("[assembleAssistant]: ToolCall: ", JSON.stringify(toolCall));
+			onEvent?.({ type: "tool_start", name: event.name, args: event.args });
+		} else if (event.type === "done") stopReason = event.stopReason;
+		else throw new Error(event.message); // error event
 	}
 
 	return { role: "assistant", content, toolCalls, stopReason };

@@ -1,4 +1,5 @@
 import { createOllamaProvider, type Message } from "@artemis/llm-core";
+import { createToolsStore } from "@artemis/llm-tools";
 import { createFileSessionStore } from "@artemis/session-store";
 import { ConsolePosition, createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
@@ -15,10 +16,13 @@ const renderer = await createCliRenderer({
 	},
 });
 
-const provider = createOllamaProvider({ model: "gemma4:12b" });
-const store = createFileSessionStore();
+const toolsStore = createToolsStore();
+const sessionStore = createFileSessionStore();
+
+const provider = createOllamaProvider({ model: "gemma4:12b", tools: await toolsStore.load() });
+
 const SESSION_ID = "tui-session";
-const initial: Message[] = await store.load(SESSION_ID);
+const initial: Message[] = await sessionStore.load(SESSION_ID);
 
 type Screen = "greeting" | "chat";
 
@@ -34,7 +38,7 @@ function TUI() {
 				) : (
 					<ChatScreen
 						provider={provider}
-						store={store}
+						store={sessionStore}
 						sessionId={SESSION_ID}
 						initial={initial}
 					/>

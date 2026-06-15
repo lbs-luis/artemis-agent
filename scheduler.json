@@ -1,0 +1,1 @@
+{"description":"Tool that schedules tasks to execute between an time gap.","schema":{"type":"object","properties":{"desc":{"type":"string","description":"Description of the task"},"gap":{"type":"string","description":"Delay before execution, e.g. 5m, 1h"}},"required":["desc","gap"]}}

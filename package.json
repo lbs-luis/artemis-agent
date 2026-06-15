@@ -4,13 +4,12 @@
 	"type": "module",
 
 	"workspaces": [
-		"apps/*",
 		"src/packages/*",
-		"web"
+		"src/apps/*"
 	],
 	"scripts": {
-		"cli": "bun apps/cli/src/index.ts",
-		"tui": "bun apps/cli/src/index.tsx",
+		"cli": "bun src/apps/cli/src/index.ts",
+		"tui": "bun src/apps/cli/src/index.tsx",
 		"dev": "bun --hot src/http/server.ts",
 		"start": "NODE_ENV=production bun src/http/server.ts",
 		"lint": "biome check .",
@@ -19,7 +18,8 @@
 	},
 	"dependencies": {
 		"@artemis/llm-core": "workspace:*",
-		"@artemis/session-store": "workspace:*"
+		"@artemis/session-store": "workspace:*",
+		"@artemis/llm-tools": "workspace:*"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
