@@ -9,16 +9,15 @@ import type {
 
 export interface RunOptions {
 	provider: ProviderStream;
-	tools?: ToolRegistry;
-	signal?: AbortSignal;
 	onEvent?: (event: AgentEvent) => void;
+	signal?: AbortSignal;
 }
 
 export async function agentLoop(
 	messages: Message[],
 	opts: RunOptions,
-): Promise<string> {
-	const { provider, tools = {}, signal, onEvent } = opts;
+): Promise<void> {
+	const { provider, signal, onEvent } = opts;
 
 	while (true) {
 		if (signal?.aborted) throw new Error("aborted");
@@ -26,22 +25,22 @@ export async function agentLoop(
 		const assistant = await assembleAssistant(
 			provider,
 			messages,
-			tools,
-			signal,
 			onEvent,
+			signal,
 		);
+
 		messages.push(assistant);
+
 		onEvent?.({ type: "turn_end" });
 
-		// ReAct STOP condition: the model stopped asking for tools.
 		if (assistant.toolCalls.length === 0) {
 			onEvent?.({ type: "done", answer: assistant.content });
-			return assistant.content;
 		}
 
 		for (const call of assistant.toolCalls) {
 			if (signal?.aborted) throw new Error("aborted");
-			const result = await runTool(tools, call, signal);
+
+			const result = await runTool({}, call, signal);
 			onEvent?.({
 				type: "tool_end",
 				name: call.name,
@@ -56,35 +55,41 @@ export async function agentLoop(
 async function assembleAssistant(
 	provider: ProviderStream,
 	messages: Message[],
-	tools: ToolRegistry,
-	signal: AbortSignal | undefined,
 	onEvent: ((e: AgentEvent) => void) | undefined,
+	signal: AbortSignal | undefined,
 ): Promise<Extract<Message, { role: "assistant" }>> {
 	let content = "";
 	const toolCalls: ToolCall[] = [];
 	let stopReason: StopReason = "stop";
 
-	const toolSchemas = Object.entries(tools).map(([name, t]) => ({
-		name,
-		description: t.description,
-	}));
-
-	console.log("[assembleAssistant]: Tools: ", JSON.stringify(toolSchemas));
-
 	for await (const event of provider(messages, {
-		tools: toolSchemas,
 		signal,
 	})) {
-		if (event.type === "delta") {
-			content += event.text;
-			onEvent?.({ type: "text", text: event.text });
-		} else if (event.type === "tool_call") {
-			const toolCall = { id: event.id, name: event.name, args: event.args };
-			toolCalls.push(toolCall);
-			console.log("[assembleAssistant]: ToolCall: ", JSON.stringify(toolCall));
-			onEvent?.({ type: "tool_start", name: event.name, args: event.args });
-		} else if (event.type === "done") stopReason = event.stopReason;
-		else throw new Error(event.message); // error event
+		const { type } = event;
+		switch (type) {
+			case "delta": {
+				content += event.text;
+				onEvent?.({ type: "text", text: event.text });
+				break;
+			}
+			case "tool_call": {
+				const toolCall = { id: event.id, name: event.name, args: event.args };
+				toolCalls.push(toolCall);
+				console.log(
+					"[assembleAssistant]: ToolCall: ",
+					JSON.stringify(toolCall),
+				);
+				onEvent?.({ type: "tool_start", name: event.name, args: event.args });
+				break;
+			}
+			case "done": {
+				stopReason = event.stopReason;
+				break;
+			}
+			default: {
+				throw new Error(event.message);
+			}
+		}
 	}
 
 	return { role: "assistant", content, toolCalls, stopReason };
@@ -97,7 +102,14 @@ async function runTool(
 ): Promise<Extract<Message, { role: "tool" }>> {
 	const tool = tools[call.name];
 	try {
-		if (!tool) throw new Error(`unknown tool: ${call.name}`);
+		if (!tool) {
+			return {
+				role: "tool",
+				toolCallId: call.id,
+				content: "Error: Tool not exists",
+				isError: true,
+			};
+		}
 		const result = await tool.execute(call.args, signal);
 		return {
 			role: "tool",

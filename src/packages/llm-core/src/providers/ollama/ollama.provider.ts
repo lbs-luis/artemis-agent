@@ -19,7 +19,7 @@ export function createOllamaProvider(config: OllamaConfig): ProviderStream {
 				messages,
 				tools: toOllamaTools(config.tools),
 				stream: true,
-				think: true,
+				think: false,
 			}),
 			signal: options?.signal, // cancellation threads through
 		});
@@ -42,18 +42,35 @@ export function createOllamaProvider(config: OllamaConfig): ProviderStream {
 			buffer += decoder.decode(value, { stream: true });
 
 			while (true) {
-				const newline = buffer.indexOf("\n"); // ← recomputed each pass (the fixed loop)
+				const newline = buffer.indexOf("\n");
 				if (newline === -1) break;
 				const line = buffer.slice(0, newline).trim();
 				buffer = buffer.slice(newline + 1);
 				if (!line) continue;
 
 				const json = JSON.parse(line) as {
-					message?: { content?: string };
+					message?: {
+						content?: string;
+						tool_calls?: {
+							id: string;
+							function: { name: string; arguments: Record<string, unknown> };
+						}[];
+					};
 					done?: boolean;
 				};
 				const token = json.message?.content;
+
 				if (token) yield { type: "delta", text: token } satisfies ProviderEvent;
+
+				for (const call of json.message?.tool_calls ?? []) {
+					yield {
+						type: "tool_call",
+						id: call.id ?? crypto.randomUUID(),
+						name: call.function.name,
+						args: call.function.arguments ?? {},
+					} satisfies ProviderEvent;
+				}
+
 				if (json.done) {
 					yield { type: "done", stopReason: "stop" } satisfies ProviderEvent;
 					return;

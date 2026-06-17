@@ -19,11 +19,9 @@ export function createFileSessionStore(dir = "storage/sessions"): SessionStore {
 			}
 		},
 
-		async append(sessionId, messages) {
-			if (messages.length === 0) return;
+		async append(sessionId, message) {
 			await mkdir(dir, { recursive: true }); // ensure ./sessions/ exists
-			const lines = messages.map((m) => `${JSON.stringify(m)}\n`).join("");
-			await appendFile(fileFor(sessionId), lines); // append; creates the file if missing
+			await appendFile(fileFor(sessionId), `${JSON.stringify(message)}\n`); // append; creates the file if missing
 		},
 	};
 }

@@ -2,75 +2,101 @@ import {
 	agentLoop,
 	type Message,
 	type ProviderStream,
+	type ToolRegistry,
 } from "@artemis/llm-core";
-import type { SessionStore } from "@artemis/session-store";
+
 import { useCallback, useRef, useState } from "react";
 
 interface Props {
 	provider: ProviderStream;
-	store: SessionStore;
-	sessionId: string;
-	initial: Message[];
+	session: {
+		chat: Message[];
+		update(message: Message): Promise<void>;
+	};
+	tools: ToolRegistry;
 }
 
-interface UIMessage {
-	role: "user" | "assistant";
-	content: string;
-}
-
-export function ChatScreen({ initial, provider, sessionId, store }: Props) {
+export function ChatScreen({ provider, session, tools }: Props) {
 	const [busy, setBusy] = useState<boolean>(false);
 	const [prompt, setPrompt] = useState<string>("");
-	const session = useRef<Message[]>(initial);
-	const [chat, setChat] = useState<UIMessage[]>(
-		initial
-			.filter(
-				(m): m is Extract<Message, { role: "user" | "assistant" }> =>
-					m.role !== "tool",
-			)
-			.map((m) => ({ role: m.role, content: m.content })),
-	);
+	const [chat, setChat] = useState<Message[]>(session.chat);
+	const liveChat = useRef<Message[]>(session.chat);
+
+	const updateChat = useCallback(({ message, clearPrompt, updateSession, updateLiveChat }: { message: Message, clearPrompt?: boolean, updateLiveChat?: boolean, updateSession?: boolean }) => {
+		setChat((prev) => [...prev, message]);
+
+		if (updateLiveChat) liveChat.current.push(message);
+		if (updateSession) session.update(message);
+		if (clearPrompt) setPrompt("");
+	}, [session])
+
+	const syncChat = useCallback(() => {
+		const lastUiMessage = chat[chat.length - 1]
+
+		liveChat.current.push(lastUiMessage)
+		session.update(lastUiMessage)
+	}, [chat, session])
 
 	const handleSendPrompt = useCallback(async () => {
 		if (prompt.trim().length === 0) return;
 		setBusy(true);
 
-		session.current.push({ role: "user", content: prompt });
-		setPrompt("");
+		// update both chats and let node asynchronous update the session file
+		updateChat({ message: { role: "user", content: prompt }, clearPrompt: true, updateSession: true, updateLiveChat: true })
 
 		let is_model_message_in_chat = false;
 
-		await agentLoop(session.current, {
+		await agentLoop(liveChat.current, {
 			provider,
-			onEvent(event) {
+			async onEvent(event) {
 				const { type } = event;
-				if (type === "text")
-					setChat((messages) => {
+				switch (type) {
+					case "text": {
 						if (!is_model_message_in_chat) {
+							updateChat({
+								message: {
+									role: "assistant",
+									content: event.text,
+									toolCalls: [],
+									stopReason: "stop",
+								},
+							})
 							is_model_message_in_chat = true;
-							return [...messages, { role: "assistant", content: event.text }];
+							break;
 						}
-						const model_message = messages[messages.length - 1];
-						messages[messages.length - 1] = {
-							...model_message,
-							content: model_message.content + event.text,
-						};
-						return [...messages];
-					});
-				else if (event.type === "tool_start")
-					console.log(`[${event.name}]`, event.args);
-				else if (event.type === "tool_end")
-					console.log(`${event.name}]`, event.content);
-				else if (event.type === "turn_end") console.log("turn_end", "...");
-				else if (event.type === "done") console.log("[agentLoop]: ", "done");
-				else if (event.type === "error")
-					console.error("\nERROR:", event.message);
+
+						setChat((prev) => {
+							prev[prev.length - 1].content += event.text;
+							return [...prev];
+						});
+						break;
+					}
+					case "done": {
+						console.log("[TUI][agentLoop]: Done");
+						if (is_model_message_in_chat) syncChat();
+						break;
+					}
+					case "tool_start": {
+						console.log("[TUI][agentLoop]: tool_start");
+						break;
+					}
+					case "tool_end": {
+						console.log("[TUI][agentLoop]: tool_end");
+						break;
+					}
+					case "turn_end": {
+						console.log("[TUI][agentLoop]: turn_end");
+						break;
+					}
+					case "error": {
+						console.log("[TUI][agentLoop]: error");
+						break;
+					}
+				}
+				setBusy(false);
 			},
 		});
-
-		await store.append(sessionId, session.current);
-		setBusy(false);
-	}, [prompt, provider, sessionId, store]);
+	}, [prompt, provider, syncChat, updateChat]);
 
 	return (
 		<box style={{ flexDirection: "column", flexGrow: 1 }}>
@@ -82,7 +108,7 @@ export function ChatScreen({ initial, provider, sessionId, store }: Props) {
 				stickyStart="bottom"
 			>
 				{chat.map((message, i) => (
-					<text key={`${sessionId}-${i}`}>{message.content}</text>
+					<text key={`${message.role}-${i}`}>{message.content}</text>
 				))}
 				{busy && <text fg="#fbbf24">artemis is thinking…</text>}
 			</scrollbox>

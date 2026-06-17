@@ -1,7 +1,7 @@
 import type { Tool } from "@artemis/llm-tools/types";
 
 export function toOllamaTools(tools: Tool[]) {
-	return tools.map((tool) => ({
+	const convertedTools = tools.map((tool) => ({
 		type: "function" as const,
 		function: {
 			name: tool.name,
@@ -9,4 +9,7 @@ export function toOllamaTools(tools: Tool[]) {
 			parameters: tool.schema,
 		},
 	}));
+
+	// console.log("[OllamaProvider][Helper]: tools", convertedTools);
+	return convertedTools;
 }

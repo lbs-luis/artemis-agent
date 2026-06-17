@@ -1,12 +1,7 @@
-import {
-	appendFile,
-	mkdir,
-	readdir,
-	readFile,
-	writeFile,
-} from "node:fs/promises";
+import { appendFile, mkdir, readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Tool, ToolSchema } from "./types";
+import { loadDefaultTools } from "./helpers/load-default-tools";
+import type { Tool } from "./types";
 import type { ToolsStore } from "./types/store.types";
 
 // const example = [
@@ -27,38 +22,6 @@ import type { ToolsStore } from "./types/store.types";
 // 	},
 // ];
 
-const schema: ToolSchema = {
-	type: "object",
-	properties: {
-		desc: {
-			type: "string",
-			description: "Description of the task",
-		},
-		gap: {
-			type: "string",
-			description: "Delay before execution, e.g. 5m, 1h",
-		},
-	},
-	required: ["desc", "gap"],
-};
-const SchedulerTool: Tool = {
-	name: "scheduler",
-	description: "Tool that schedules tasks to execute between an time gap.",
-	schema,
-	async execute({ desc, gap }: { desc: string; gap: string }) {
-		console.log("[llm-tools]: Desc: ", desc);
-		console.log("[llm-tools]: Gap: ", gap);
-	},
-};
-
-const defaultTools = [
-	{
-		name: SchedulerTool.name,
-		description: SchedulerTool.description,
-		schema: SchedulerTool.schema,
-	},
-];
-
 export function createToolsStore(dir = "storage/tools"): ToolsStore {
 	return {
 		async load() {
@@ -69,15 +32,7 @@ export function createToolsStore(dir = "storage/tools"): ToolsStore {
 			files = files.filter((f) => f.endsWith(".json"));
 
 			if (files.length === 0) {
-				for (const tool of defaultTools) {
-					await writeFile(
-						join(dir, `${tool.name}.json`),
-						JSON.stringify(tool, null, 2),
-						"utf8",
-					);
-				}
-
-				files = await readdir(dir);
+				return await loadDefaultTools();
 			}
 
 			const tools = await Promise.all(
@@ -86,11 +41,11 @@ export function createToolsStore(dir = "storage/tools"): ToolsStore {
 					.map(async (file) => {
 						const text = await readFile(join(dir, file), "utf8");
 
-						return JSON.parse(text);
+						return JSON.parse(text) as Tool;
 					}),
 			);
 
-			return tools;
+			return [...tools, ...(await loadDefaultTools())];
 		},
 
 		async append(toolName, newTool) {
