@@ -72,24 +72,25 @@ export function ChatScreen({ provider, session, tools }: Props) {
 						break;
 					}
 					case "done": {
-						console.log("[TUI][agentLoop]: Done");
+						console.log("[TUI]: Done");
 						if (is_model_message_in_chat) syncChat();
 						break;
 					}
 					case "tool_start": {
-						console.log("[TUI][agentLoop]: tool_start");
+						console.log("[TUI]: tool_start");
+						console.log(`[TUI]:[tool_start]: ${liveChat.current[liveChat.current.length - 1].role}`)
 						break;
 					}
 					case "tool_end": {
-						console.log("[TUI][agentLoop]: tool_end");
+						console.log("[TUI]: tool_end");
 						break;
 					}
 					case "turn_end": {
-						console.log("[TUI][agentLoop]: turn_end");
+						console.log("[TUI]: turn_end");
 						break;
 					}
 					case "error": {
-						console.log("[TUI][agentLoop]: error");
+						console.log("[TUI]: error");
 						break;
 					}
 				}

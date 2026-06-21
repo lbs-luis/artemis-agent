@@ -1,3 +1,4 @@
+import { saveLog } from "@artemis/logs";
 import type {
 	AgentEvent,
 	Message,
@@ -35,19 +36,35 @@ export async function agentLoop(
 
 		if (assistant.toolCalls.length === 0) {
 			onEvent?.({ type: "done", answer: assistant.content });
+			return;
 		}
 
 		for (const call of assistant.toolCalls) {
 			if (signal?.aborted) throw new Error("aborted");
 
-			const result = await runTool({}, call, signal);
+			//TODO: integrar modulo de carregamento de ferramentas padrão e registro de ferramentas
+			const tools: ToolRegistry = {
+				scheduler: async ({ task, time, repeat }) => {
+					console.log(`Tool Scheduler: ARGS: ${task}, ${time}, ${repeat}`);
+
+					return {
+						message: `Task: ${task} scheduled to ${time}, the model will be notified to start the task when the time comes`,
+					};
+				},
+			};
+
+			const result = await runTool(tools, call, signal);
+
 			onEvent?.({
 				type: "tool_end",
 				name: call.name,
 				content: result.content,
 				isError: result.isError,
 			});
+
 			messages.push(result);
+
+			saveLog({ description: "agentic-loop/tool_call", content: call.name });
 		}
 	}
 }
@@ -75,10 +92,7 @@ async function assembleAssistant(
 			case "tool_call": {
 				const toolCall = { id: event.id, name: event.name, args: event.args };
 				toolCalls.push(toolCall);
-				console.log(
-					"[assembleAssistant]: ToolCall: ",
-					JSON.stringify(toolCall),
-				);
+				console.log(`[agenticLoop][assembleAssistant]: ${event.name}`);
 				onEvent?.({ type: "tool_start", name: event.name, args: event.args });
 				break;
 			}
@@ -100,7 +114,10 @@ async function runTool(
 	call: ToolCall,
 	signal: AbortSignal | undefined,
 ): Promise<Extract<Message, { role: "tool" }>> {
+	console.log(`[agenticLoop][runTool]: ${call.name}`);
+
 	const tool = tools[call.name];
+
 	try {
 		if (!tool) {
 			return {
@@ -110,7 +127,13 @@ async function runTool(
 				isError: true,
 			};
 		}
-		const result = await tool.execute(call.args, signal);
+
+		const result = await tool(call.args, signal);
+
+		console.log(
+			`[runTool]: tool: ${call.name} result: ${JSON.stringify(result)}`,
+		);
+
 		return {
 			role: "tool",
 			toolCallId: call.id,

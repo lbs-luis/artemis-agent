@@ -8,6 +8,7 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"@artemis/llm-tools": "workspace:*"
+		"@artemis/llm-tools": "workspace:*",
+		"@artemis/logs": "workspace:*"
 	}
 }

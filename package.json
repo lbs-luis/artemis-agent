@@ -19,7 +19,8 @@
 	"dependencies": {
 		"@artemis/llm-core": "workspace:*",
 		"@artemis/session-store": "workspace:*",
-		"@artemis/llm-tools": "workspace:*"
+		"@artemis/llm-tools": "workspace:*",
+		"@artemis/logs": "workspace:*"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",

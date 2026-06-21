@@ -10,13 +10,15 @@ export type ToolSchema = {
 	required?: string[];
 };
 
+export type ToolExecute = (
+	args: Record<string, unknown>,
+	signal?: AbortSignal,
+) => Promise<unknown>;
+
 export interface Tool {
 	name: string;
 	description: string;
 	schema: ToolSchema;
-	execute(
-		args: Record<string, unknown>,
-		signal?: AbortSignal,
-	): Promise<unknown>;
+	execute: ToolExecute;
 }
-export type ToolRegistry = Record<string, Tool>;
+export type ToolRegistry = Record<string, ToolExecute>;

@@ -7,6 +7,7 @@
       "dependencies": {
         "@artemis/llm-core": "workspace:*",
         "@artemis/llm-tools": "workspace:*",
+        "@artemis/logs": "workspace:*",
         "@artemis/session-store": "workspace:*",
       },
       "devDependencies": {
@@ -61,10 +62,15 @@
       "version": "0.0.1",
       "dependencies": {
         "@artemis/llm-tools": "workspace:*",
+        "@artemis/logs": "workspace:*",
       },
     },
     "src/packages/llm-tools": {
       "name": "@artemis/llm-tools",
+      "version": "0.0.1",
+    },
+    "src/packages/logs": {
+      "name": "@artemis/logs",
       "version": "0.0.1",
     },
     "src/packages/session-store": {
@@ -81,6 +87,8 @@
     "@artemis/llm-core": ["@artemis/llm-core@workspace:src/packages/llm-core"],
 
     "@artemis/llm-tools": ["@artemis/llm-tools@workspace:src/packages/llm-tools"],
+
+    "@artemis/logs": ["@artemis/logs@workspace:src/packages/logs"],
 
     "@artemis/session-store": ["@artemis/session-store@workspace:src/packages/session-store"],
 
