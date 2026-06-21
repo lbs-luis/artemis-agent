@@ -12,15 +12,15 @@
 		"tui": "bun src/apps/cli/src/index.tsx",
 		"dev": "bun --hot src/http/server.ts",
 		"start": "NODE_ENV=production bun src/http/server.ts",
-		"lint": "biome check .",
-		"fix": "biome check --write .",
+		"lint": "biome check --write .",
 		"typecheck": "bunx tsc --noEmit"
 	},
 	"dependencies": {
 		"@artemis/llm-core": "workspace:*",
 		"@artemis/session-store": "workspace:*",
 		"@artemis/llm-tools": "workspace:*",
-		"@artemis/logs": "workspace:*"
+		"@artemis/logs": "workspace:*",
+		"@artemis/llm-providers": "workspace:*"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",

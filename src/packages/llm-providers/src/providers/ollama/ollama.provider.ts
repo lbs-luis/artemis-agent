@@ -1,10 +1,10 @@
-import type { ProviderEvent, ProviderStream, Tool } from "@artemis/llm-core";
-import { toOllamaTools } from "./ollama.helpers";
+import type { ProviderEvent, ProviderStream } from "@artemis/llm-core";
+import llmTools from "@artemis/llm-tools";
+import { toOllamaMessages, toOllamaTools } from "./ollama.helpers";
 
 export interface OllamaConfig {
 	baseUrl?: string;
 	model: string;
-	tools: Tool[];
 }
 
 export function createOllamaProvider(config: OllamaConfig): ProviderStream {
@@ -16,8 +16,8 @@ export function createOllamaProvider(config: OllamaConfig): ProviderStream {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
 				model: config.model,
-				messages,
-				tools: toOllamaTools(config.tools),
+				messages: toOllamaMessages(messages),
+				tools: toOllamaTools(await llmTools.load()),
 				stream: true,
 				think: false,
 			}),

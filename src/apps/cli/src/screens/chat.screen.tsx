@@ -13,36 +13,54 @@ interface Props {
 		chat: Message[];
 		update(message: Message): Promise<void>;
 	};
-	tools: ToolRegistry;
+
 }
 
-export function ChatScreen({ provider, session, tools }: Props) {
+export function ChatScreen({ provider, session }: Props) {
 	const [busy, setBusy] = useState<boolean>(false);
 	const [prompt, setPrompt] = useState<string>("");
 	const [chat, setChat] = useState<Message[]>(session.chat);
 	const liveChat = useRef<Message[]>(session.chat);
 
-	const updateChat = useCallback(({ message, clearPrompt, updateSession, updateLiveChat }: { message: Message, clearPrompt?: boolean, updateLiveChat?: boolean, updateSession?: boolean }) => {
-		setChat((prev) => [...prev, message]);
+	const updateChat = useCallback(
+		({
+			message,
+			clearPrompt,
+			updateSession,
+			updateLiveChat,
+		}: {
+			message: Message;
+			clearPrompt?: boolean;
+			updateLiveChat?: boolean;
+			updateSession?: boolean;
+		}) => {
+			setChat((prev) => [...prev, message]);
 
-		if (updateLiveChat) liveChat.current.push(message);
-		if (updateSession) session.update(message);
-		if (clearPrompt) setPrompt("");
-	}, [session])
+			if (updateLiveChat) liveChat.current.push(message);
+			if (updateSession) session.update(message);
+			if (clearPrompt) setPrompt("");
+		},
+		[session],
+	);
 
 	const syncChat = useCallback(() => {
-		const lastUiMessage = chat[chat.length - 1]
+		const lastUiMessage = chat[chat.length - 1];
 
-		liveChat.current.push(lastUiMessage)
-		session.update(lastUiMessage)
-	}, [chat, session])
+		liveChat.current.push(lastUiMessage);
+		session.update(lastUiMessage);
+	}, [chat, session]);
 
 	const handleSendPrompt = useCallback(async () => {
 		if (prompt.trim().length === 0) return;
 		setBusy(true);
 
 		// update both chats and let node asynchronous update the session file
-		updateChat({ message: { role: "user", content: prompt }, clearPrompt: true, updateSession: true, updateLiveChat: true })
+		updateChat({
+			message: { role: "user", content: prompt },
+			clearPrompt: true,
+			updateSession: true,
+			updateLiveChat: true,
+		});
 
 		let is_model_message_in_chat = false;
 
@@ -60,7 +78,7 @@ export function ChatScreen({ provider, session, tools }: Props) {
 									toolCalls: [],
 									stopReason: "stop",
 								},
-							})
+							});
 							is_model_message_in_chat = true;
 							break;
 						}
@@ -78,7 +96,9 @@ export function ChatScreen({ provider, session, tools }: Props) {
 					}
 					case "tool_start": {
 						console.log("[TUI]: tool_start");
-						console.log(`[TUI]:[tool_start]: ${liveChat.current[liveChat.current.length - 1].role}`)
+						console.log(
+							`[TUI]:[tool_start]: ${liveChat.current[liveChat.current.length - 1].role}`,
+						);
 						break;
 					}
 					case "tool_end": {

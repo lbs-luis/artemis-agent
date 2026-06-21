@@ -1,15 +1,13 @@
 {
-	"name": "@artemis/llm-tools",
+	"name": "@artemis/llm-providers",
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
 	"module": "src/index.ts",
 	"exports": {
-		".": "./src/index.ts",
-		"./types": "./src/types/index.ts"
+		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"@artemis/llm-core": "workspace:*",
 		"@artemis/llm-tools": "workspace:*",
 		"@artemis/logs": "workspace:*"
 	}

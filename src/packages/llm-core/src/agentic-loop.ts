@@ -1,3 +1,4 @@
+import llmTools from "@artemis/llm-tools";
 import { saveLog } from "@artemis/logs";
 import type {
 	AgentEvent,
@@ -42,16 +43,13 @@ export async function agentLoop(
 		for (const call of assistant.toolCalls) {
 			if (signal?.aborted) throw new Error("aborted");
 
-			//TODO: integrar modulo de carregamento de ferramentas padrão e registro de ferramentas
-			const tools: ToolRegistry = {
-				scheduler: async ({ task, time, repeat }) => {
-					console.log(`Tool Scheduler: ARGS: ${task}, ${time}, ${repeat}`);
-
-					return {
-						message: `Task: ${task} scheduled to ${time}, the model will be notified to start the task when the time comes`,
-					};
+			const tools = (await llmTools.load()).reduce<ToolRegistry>(
+				(toolsRecord, tool) => {
+					toolsRecord[tool.name] = tool.execute;
+					return toolsRecord;
 				},
-			};
+				{},
+			);
 
 			const result = await runTool(tools, call, signal);
 
@@ -114,38 +112,36 @@ async function runTool(
 	call: ToolCall,
 	signal: AbortSignal | undefined,
 ): Promise<Extract<Message, { role: "tool" }>> {
-	console.log(`[agenticLoop][runTool]: ${call.name}`);
+	const { args: toolArgs, id: toolCallId, name: toolName } = call;
 
-	const tool = tools[call.name];
+	const toolExecuteFunction = tools[call.name];
+
+	const toolEvent: Extract<Message, { role: "tool" }> = {
+		role: "tool",
+		toolCallId,
+		toolName,
+		content: "",
+		isError: false,
+	};
+
+	function setToolErrorEvent(error: string) {
+		toolEvent.isError = true;
+		toolEvent.content = error;
+	}
 
 	try {
-		if (!tool) {
-			return {
-				role: "tool",
-				toolCallId: call.id,
-				content: "Error: Tool not exists",
-				isError: true,
-			};
+		if (!toolExecuteFunction) {
+			setToolErrorEvent(`Error: Tool not found - ${toolName}`);
+			return toolEvent;
 		}
 
-		const result = await tool(call.args, signal);
+		const result = await toolExecuteFunction(toolArgs, signal);
 
-		console.log(
-			`[runTool]: tool: ${call.name} result: ${JSON.stringify(result)}`,
-		);
+		toolEvent.content = JSON.stringify(result);
 
-		return {
-			role: "tool",
-			toolCallId: call.id,
-			content: JSON.stringify(result),
-			isError: false,
-		};
+		return toolEvent;
 	} catch (err) {
-		return {
-			role: "tool",
-			toolCallId: call.id,
-			content: err instanceof Error ? err.message : String(err),
-			isError: true,
-		};
+		setToolErrorEvent(err instanceof Error ? err.message : String(err));
+		return toolEvent;
 	}
 }

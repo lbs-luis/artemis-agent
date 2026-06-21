@@ -1,0 +1,28 @@
+{
+	"name": "scheduler",
+	"description": "Schedules a task to run later — once or on a recurring basis. Use ONLY for delayed, future, or recurring actions: reminders, notifications, periodic checks, monitoring, routines. Do NOT use for actions that must happen immediately.\n\nHOW TO PASS TIME: This tool does NOT know the current time. For any relative request ('in 20 minutes', 'tonight', 'tomorrow at 8'), FIRST call getCurrentTime, then compute the absolute date and time from its result and pass them here. Pass 'date' (YYYY-MM-DD) and 'time' (HH:mm:ss) in 24-hour local time. Use 'repeat' to set the frequency.\n\nRETURN: On success returns status='scheduled' with a ready-to-use 'message' field describing what was scheduled and when — base your reply to the user on that 'message'. On failure returns status='error' with a 'message' explaining what to fix (e.g. the time already passed); read it and correct your arguments, usually by calling getCurrentTime again.",
+	"schema": {
+		"type": "object",
+		"properties": {
+			"task": {
+				"type": "string",
+				"description": "What should happen when the schedule fires, as a clear self-contained instruction. Example: 'Remind the user to drink water'."
+			},
+			"date": {
+				"type": "string",
+				"description": "Execution date in YYYY-MM-DD format (local time). OPTIONAL — defaults to today if omitted. For recurring tasks this is the date of the FIRST execution. Example: '2026-06-21'."
+			},
+			"time": {
+				"type": "string",
+				"description": "Execution time in 24-hour HH:mm:ss format (local time). Example: '18:00:00'."
+			},
+			"repeat": {
+				"type": "string",
+				"enum": ["none", "daily", "weekly", "monthly"],
+				"description": "How often the task repeats. 'none' = runs exactly once at date+time. 'daily'/'weekly'/'monthly' = runs at the given time, starting on the given date, repeating at that interval. Examples: 'remind me in 20 minutes' => 'none'; 'every day at 07:00' => 'daily'; 'every monday' => 'weekly'."
+			}
+		},
+		"required": ["task", "time", "repeat"],
+		"additionalProperties": false
+	}
+}

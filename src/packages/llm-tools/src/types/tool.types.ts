@@ -1,5 +1,5 @@
 export type ToolSchema = {
-	type: "object";
+	type: string; // should be 'object' always
 	properties: Record<
 		string,
 		{

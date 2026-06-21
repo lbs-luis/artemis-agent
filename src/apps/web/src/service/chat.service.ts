@@ -1,5 +1,5 @@
-import type { Message } from "@/types/chat.types";
 import type { Dispatch, SetStateAction } from "react";
+import type { Message } from "@/types/chat.types";
 
 export async function sendChatMessage(
 	prompt: string,

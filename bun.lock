@@ -6,6 +6,7 @@
       "name": "artemis-agent",
       "dependencies": {
         "@artemis/llm-core": "workspace:*",
+        "@artemis/llm-providers": "workspace:*",
         "@artemis/llm-tools": "workspace:*",
         "@artemis/logs": "workspace:*",
         "@artemis/session-store": "workspace:*",
@@ -65,9 +66,22 @@
         "@artemis/logs": "workspace:*",
       },
     },
+    "src/packages/llm-providers": {
+      "name": "@artemis/llm-providers",
+      "version": "0.0.1",
+      "dependencies": {
+        "@artemis/llm-tools": "workspace:*",
+        "@artemis/logs": "workspace:*",
+      },
+    },
     "src/packages/llm-tools": {
       "name": "@artemis/llm-tools",
       "version": "0.0.1",
+      "dependencies": {
+        "@artemis/llm-core": "workspace:*",
+        "@artemis/llm-tools": "workspace:*",
+        "@artemis/logs": "workspace:*",
+      },
     },
     "src/packages/logs": {
       "name": "@artemis/logs",
@@ -85,6 +99,8 @@
     "@artemis/cli": ["@artemis/cli@workspace:src/apps/cli"],
 
     "@artemis/llm-core": ["@artemis/llm-core@workspace:src/packages/llm-core"],
+
+    "@artemis/llm-providers": ["@artemis/llm-providers@workspace:src/packages/llm-providers"],
 
     "@artemis/llm-tools": ["@artemis/llm-tools@workspace:src/packages/llm-tools"],
 

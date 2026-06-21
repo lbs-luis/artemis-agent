@@ -1,0 +1,10 @@
+{
+	"name": "getCurrentTime",
+	"description": "Returns the current date and time from the system clock, timezone-aware. Call this BEFORE anything that depends on 'now': scheduling, reminders, deadlines, time math, or relative requests like 'in 20 minutes', 'tonight', 'tomorrow at 8'. Never guess or assume the current time — always call this tool first and use its result.",
+	"schema": {
+		"type": "object",
+		"properties": {},
+		"required": [],
+		"additionalProperties": false
+	}
+}
